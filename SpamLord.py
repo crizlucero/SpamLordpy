@@ -2,6 +2,15 @@ import re
 from os import listdir
 from os.path import isfile, join
 
+def CorregirTelefono(telefono):
+    telefono = telefono.replace(" ",'')
+    telefono = telefono.replace('-','')
+    if re.match('\([0-9]*\)',telefono):
+        telefono = telefono.replace("(",'')
+        telefono = telefono.replace(")",'')
+
+    return telefono
+
 onlyfiles = [f for f in listdir("MIT Sloan Staff Directory") if isfile(join("MIT Sloan Staff Directory",f))]
 count1, count2 = 0,0
 correos = []
@@ -23,6 +32,7 @@ for files in onlyfiles:
                 #print m[0]
                 count1 = count1 + 1
         line = None
+        h.seek(0)
     c.close()
     h.seek(0)
     for line in t:
@@ -31,15 +41,19 @@ for files in onlyfiles:
             m = re.findall(line,row)
             if len(m) > 0:
                 for tel in m:
+                    tel = CorregirTelefono(tel)
                     if(not tel in telefonos):
                         telefonos.append(tel)
                 #print m[0]
                 count2 = count2 + 1
         line = None
+        h.seek(0)
     t.close()
-print len(correos)
-print len(telefonos)
-print count1
-print count2
-
+telefonos.sort()
+cw = open("Datos.dat",'w')
+for correo in correos:
+    cw.write(correo + '\n')
+for telefono in telefonos:
+    cw.write(telefono + "\n")
+cw.close()
 
