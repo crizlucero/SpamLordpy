@@ -2,8 +2,18 @@ import re
 from os import listdir
 from os.path import isfile, join
 
+
+def CorregirTelefono(tels):
+    tels = tels.replace(" ", '')
+    tels = tels.replace('-', '')
+    if re.match('\([0-9]*\)', tels):
+        tels = tels.replace("(", '')
+        tels = tels.replace(")", '')
+
+    return tels
+
 onlyfiles = [f for f in listdir("MIT Sloan Staff Directory") if isfile(join("MIT Sloan Staff Directory",f))]
-count1, count2 = 0,0
+count1, count2 = 0, 0
 correos = []
 telefonos = []
 #abrir Archivo
@@ -15,31 +25,36 @@ for files in onlyfiles:
     for line in c:
         for row in h:
             line = line.strip('\n')
-            m = re.findall(line,row)
+            m = re.findall(line, row)
             if len(m) > 0:
                 for mail in m:
-                    if(not mail in correos):
+                    if mail not in correos:
                         correos.append(mail)
-                #print m[0]
-                count1 = count1 + 1
+                count1 += 1
         line = None
+        h.seek(0)
     c.close()
     h.seek(0)
     for line in t:
         for row in h:
             line = line.strip('\n')
-            m = re.findall(line,row)
+            m = re.findall(line, row)
             if len(m) > 0:
                 for tel in m:
-                    if(not tel in telefonos):
+                    tel = CorregirTelefono(tel)
+                    if tel not in telefonos:
                         telefonos.append(tel)
-                #print m[0]
-                count2 = count2 + 1
+                count2 += 1
         line = None
+        h.seek(0)
     t.close()
-print len(correos)
-print len(telefonos)
-print count1
-print count2
-
+telefonos.sort()
+cw = open("Datos.dat",'w')
+cw.write('-----------------------------CORREOS-----------------------------\n')
+for correo in correos:
+    cw.write(correo[0] + '\n')
+cw.write('----------------------------TELEFONOS----------------------------\n')
+for telefono in telefonos:
+    cw.write("(" + telefono[:3] + ") " + telefono[3:6] + "-" + telefono[6:] + "\n")
+cw.close()
 
